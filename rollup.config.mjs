@@ -18,12 +18,12 @@ export default [
     plugins: [esbuild()],
     output: [
       {
-        file: `${name}.js`,
+        file: `dist/${name}.js`,
         format: 'cjs',
         sourcemap: true,
       },
       {
-        file: `${name}.mjs`,
+        file: `dist/${name}.mjs`,
         format: 'es',
         sourcemap: true,
       },
@@ -32,7 +32,7 @@ export default [
   bundle({
     plugins: [dts()],
     output: {
-      file: `${name}.d.ts`,
+      file: `dist/${name}.d.ts`,
       format: 'es',
     },
   }),
