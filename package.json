@@ -19,6 +19,7 @@
   },
   "homepage": "https://rob-long.github.io/app-bridge/modules.html",
   "publishConfig": {
+    "access": "public",
     "registry": "https://npm.pkg.github.com"
   },
   "keywords": [],
