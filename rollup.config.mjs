@@ -1,6 +1,7 @@
 import { createRequire } from 'module';
 import dts from 'rollup-plugin-dts';
 import esbuild from 'rollup-plugin-esbuild';
+import resolve from '@rollup/plugin-node-resolve';
 
 const require = createRequire(import.meta.url);
 const packageJson = require('./package.json');
@@ -15,15 +16,20 @@ const bundle = (config) => ({
 
 export default [
   bundle({
-    plugins: [esbuild()],
+    plugins: [
+      resolve({
+        extensions: ['.js', '.ts'], // Resolve these extensions
+      }),
+      esbuild(),
+    ],
     output: [
       {
-        file: `dist/${name}.js`,
+        file: `${name}.js`,
         format: 'cjs',
         sourcemap: true,
       },
       {
-        file: `dist/${name}.mjs`,
+        file: `${name}.mjs`,
         format: 'es',
         sourcemap: true,
       },
@@ -32,7 +38,7 @@ export default [
   bundle({
     plugins: [dts()],
     output: {
-      file: `dist/${name}.d.ts`,
+      file: `${name}.d.ts`,
       format: 'es',
     },
   }),

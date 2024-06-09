@@ -1,6 +1,6 @@
 {
-  "preset": "ts-jest/presets/default-esm",
-  "testEnvironment": "node",
+  "preset": "ts-jest",
+  "testEnvironment": "jsdom",
   "testMatch": ["**/tests/**/*.test.ts"],
   "moduleFileExtensions": ["ts", "js"],
   "transform": {
