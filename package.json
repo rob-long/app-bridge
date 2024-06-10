@@ -1,6 +1,6 @@
 {
   "name": "@rob-long/app-bridge",
-  "version": "0.0.4",
+  "version": "1.0.0",
   "description": "App bridge for Angular and React",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -9,6 +9,7 @@
   "scripts": {
     "test": "jest --config jest.config.json",
     "build": "rollup -c",
+    "build:local": "npm run build && npm pack -pack-destination ~",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
     "docs": "typedoc"

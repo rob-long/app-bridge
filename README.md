@@ -1,6 +1,5 @@
 # @rob-long/app-bridge
 
-**Version**: 0.0.4  
 **Description**: App bridge for Angular and React
 
 ## Overview
@@ -16,7 +15,7 @@ npm install @rob-long/app-bridge
 ## Features
 
 - **State Management**: Utilize RxJS `BehaviorSubject` for managing state.
-- **Framework Integration**: Seamless integration with Angular and React.
+- **Framework Integration**: Seamless integration with Angular and React; additional framework support can be added.
 - **TypeScript Support**: Fully typed with TypeScript for better developer experience.
 
 ## Usage

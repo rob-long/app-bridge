@@ -1,5 +1,6 @@
 import { BehaviorSubject } from 'rxjs';
-import { createAppBridge, WindowWithSubjectManager } from '../src/AppBridge';
+import { createAppBridge } from '../src/AppBridge';
+import { WindowWithSubjectManager } from '../src/types';
 
 // Define the specific subject names for testing
 interface TestSubjects {

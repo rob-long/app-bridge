@@ -1,5 +1,6 @@
 import angular from 'angular';
-import { createAppBridge, SubjectKey } from './AppBridge.ts';
+import { createAppBridge } from './AppBridge.ts';
+import { SubjectKey } from './types.ts';
 
 /**
  * Function to create a generic AppBridgeService for Angular.
