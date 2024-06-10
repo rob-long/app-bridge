@@ -1,33 +1,40 @@
 import { BehaviorSubject, Subscription } from 'rxjs';
 
 /**
- * Interface for subject names with generic values.
- */
-export interface SubjectNames {
-  [key: string]: any;
-}
-
-/**
  * Interface for subject entries where the values are BehaviorSubject<any>.
  */
-export type SubjectEntries<T extends SubjectNames> = {
-  [K in keyof T]: BehaviorSubject<T[K] | null>;
+export type SubjectEntries<T> = {
+  [K in SubjectKey<T>]: BehaviorSubject<T[K] | null>;
 };
 
 /**
  * Interface extending the Window object to include a subject manager.
  */
-export interface WindowWithSubjectManager<T extends SubjectNames>
-  extends Window {
+export interface WindowWithSubjectManager<T> extends Window {
   _subjectManager: SubjectEntries<T>;
+}
+
+/**
+ * `AppBridgeOptions` interface for defining options in AppBridge.
+ *
+ * @property reset - Optional. If true, resets the AppBridge.
+ */
+export interface AppBridgeOptions {
+  reset?: boolean;
 }
 
 declare const window: WindowWithSubjectManager<any>;
 
 /**
- * AppBridge class provides a bridge for state management using RxJS BehaviorSubjects.
+ * Type alias for valid keys of T.
  */
-class AppBridge<T extends SubjectNames> {
+export type SubjectKey<T> = keyof T & string;
+
+/**
+ * AppBridge class provides a bridge for state management using RxJS BehaviorSubjects.
+ * @template T - The type of the subjects managed by AppBridge.
+ */
+class AppBridge<T> {
   private static instance: AppBridge<any>;
 
   private constructor() {
@@ -36,11 +43,28 @@ class AppBridge<T extends SubjectNames> {
     }
   }
 
-  public static getInstance<T extends SubjectNames>(): AppBridge<T> {
-    if (!AppBridge.instance) {
+  /**
+   * Gets the singleton instance of the AppBridge.
+   * @param options - Options to configure the instance.
+   * @returns The singleton instance of AppBridge.
+   */
+  public static getInstance<T>(options: AppBridgeOptions = {}): AppBridge<T> {
+    if (!AppBridge.instance || options.reset) {
       AppBridge.instance = new AppBridge<T>();
     }
     return AppBridge.instance;
+  }
+
+  /**
+   * Clears all subjects, completing and removing them from the manager.
+   */
+  clearAllSubjects(): void {
+    for (const subjectKey in window._subjectManager) {
+      if (window._subjectManager.hasOwnProperty(subjectKey)) {
+        window._subjectManager[subjectKey].complete();
+        delete window._subjectManager[subjectKey];
+      }
+    }
   }
 
   /**
@@ -49,11 +73,9 @@ class AppBridge<T extends SubjectNames> {
    * @param name - The name of the subject.
    * @returns The BehaviorSubject instance.
    */
-  getSubject<K extends keyof T>(name: K): BehaviorSubject<T[K] | null> {
+  getSubject<K extends SubjectKey<T>>(name: K): BehaviorSubject<T[K] | null> {
     if (!window._subjectManager[name]) {
-      window._subjectManager[name as string] = new BehaviorSubject<T[K] | null>(
-        null,
-      );
+      window._subjectManager[name] = new BehaviorSubject<T[K] | null>(null);
     }
     return window._subjectManager[name];
   }
@@ -64,18 +86,8 @@ class AppBridge<T extends SubjectNames> {
    * @param name - The name of the subject.
    * @param newState - The new state to update.
    */
-  updateSubject<K extends keyof T>(name: K, newState: T[K]): void {
+  updateSubject<K extends SubjectKey<T>>(name: K, newState: T[K]): void {
     this.getSubject(name).next(newState);
-  }
-
-  /**
-   * Retrieves the current value of a BehaviorSubject by name.
-   *
-   * @param name - The name of the subject.
-   * @returns The current value of the subject.
-   */
-  getValue<K extends keyof T>(name: K): T[K] | null {
-    return this.getSubject(name).getValue();
   }
 
   /**
@@ -84,8 +96,18 @@ class AppBridge<T extends SubjectNames> {
    * @param name - The name of the subject.
    * @param error - The error to emit.
    */
-  errorSubject<K extends keyof T>(name: K, error: any): void {
+  errorSubject<K extends SubjectKey<T>>(name: K, error: any): void {
     this.getSubject(name).error(error);
+  }
+
+  /**
+   * Retrieves the current value of a BehaviorSubject by name.
+   *
+   * @param name - The name of the subject.
+   * @returns The current value of the subject.
+   */
+  getValue<K extends SubjectKey<T>>(name: K): T[K] | null {
+    return this.getSubject(name).getValue();
   }
 
   /**
@@ -95,7 +117,7 @@ class AppBridge<T extends SubjectNames> {
    * @param observer - The observer object with next, error, and complete callbacks.
    * @returns The subscription to the subject.
    */
-  subscribe<K extends keyof T>(
+  subscribe<K extends SubjectKey<T>>(
     name: K,
     observer: {
       next?: (value: T[K] | null) => void;
@@ -110,6 +132,6 @@ class AppBridge<T extends SubjectNames> {
 /**
  * Singleton instance creator for the AppBridge class.
  */
-export function createAppBridge<T extends SubjectNames>() {
-  return AppBridge.getInstance<T>();
+export function createAppBridge<T>(options: AppBridgeOptions = {}) {
+  return AppBridge.getInstance<T>(options);
 }

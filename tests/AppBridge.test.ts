@@ -1,13 +1,10 @@
 import { BehaviorSubject } from 'rxjs';
-import {
-  createAppBridge,
-  WindowWithSubjectManager,
-  SubjectNames,
-} from '../src/AppBridge';
+import { createAppBridge, WindowWithSubjectManager } from '../src/AppBridge';
 
 // Define the specific subject names for testing
-interface TestSubjects extends SubjectNames {
-  testSubjectString: string;
+interface TestSubjects {
+  testSubjectString?: string;
+  anotherSubject?: number;
 }
 
 type WindowWithAppBridge = WindowWithSubjectManager<TestSubjects>;
@@ -18,28 +15,30 @@ describe('AppBridge', () => {
   let appBridge: ReturnType<typeof createAppBridge<TestSubjects>>;
 
   beforeEach(() => {
-    // Reset the _subjectManager before each test
-    window._subjectManager = {
-      testSubjectString: new BehaviorSubject<string | null>(null),
-    };
-    appBridge = createAppBridge<TestSubjects>();
+    // Reset the App before each test
+    appBridge = createAppBridge<TestSubjects>({ reset: true });
+  });
+
+  afterEach(() => {
+    // Ensure that all subscriptions are unsubscribed and state is cleared
+    appBridge.clearAllSubjects();
   });
 
   test('should initialize a new BehaviorSubject if it does not exist', () => {
-    const subject = appBridge.getSubject<string>('testSubjectString');
+    const subject = appBridge.getSubject('testSubjectString');
     expect(subject).toBeInstanceOf(BehaviorSubject);
     expect(subject.getValue()).toBeNull();
   });
 
   test('should update the BehaviorSubject with a new value', () => {
-    const subject = appBridge.getSubject<string>('testSubjectString');
+    const subject = appBridge.getSubject('testSubjectString');
     appBridge.updateSubject('testSubjectString', 'newValue');
     expect(subject.getValue()).toBe('newValue');
   });
 
   test('should return the current value of the BehaviorSubject', () => {
     appBridge.updateSubject('testSubjectString', 'currentValue');
-    const value = appBridge.getValue<string>('testSubjectString');
+    const value = appBridge.getValue('testSubjectString');
     expect(value).toBe('currentValue');
   });
 

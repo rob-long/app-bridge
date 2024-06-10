@@ -1,21 +1,31 @@
 import angular from 'angular';
-import AppBridge from './AppBridge.ts';
+import { createAppBridge, SubjectKey } from './AppBridge.ts';
 
-const appBridgeService = angular
-  .module('myApp', [])
-  .factory('AppBridgeService', [
+/**
+ * Function to create a generic AppBridgeService for Angular.
+ *
+ * @returns The Angular module with the AppBridgeService factory.
+ */
+export function createAppBridgeService<T>(applicationName: string) {
+  return angular.module(applicationName, []).factory('AppBridgeService', [
     '$rootScope',
     function ($rootScope: angular.IRootScopeService) {
+      const appBridge = createAppBridge<T>();
       return {
-        getSubject: <T>(name: string) => AppBridge.getSubject<T>(name),
-        getValue: <T>(name: string) => AppBridge.getValue<T>(name),
-        updateSubject: <T>(name: string, newState: T) =>
-          AppBridge.updateSubject<T>(name, newState),
-        subscribe: <T>(name: string, next: (newState: T) => void) => {
-          const subscription = AppBridge.subscribe(name, {
+        getSubject: <K extends SubjectKey<T>>(name: K) =>
+          appBridge.getSubject<K>(name),
+        getValue: <K extends SubjectKey<T>>(name: K) =>
+          appBridge.getValue<K>(name),
+        updateSubject: <K extends SubjectKey<T>>(name: K, newState: T[K]) =>
+          appBridge.updateSubject<K>(name, newState),
+        subscribe: <K extends SubjectKey<T>>(
+          name: K,
+          next: (newState: T[K] | null) => void,
+        ) => {
+          const subscription = appBridge.subscribe(name, {
             next: (newState) => {
               $rootScope.$apply(() => {
-                next(newState as T);
+                next(newState);
               });
             },
           });
@@ -24,5 +34,6 @@ const appBridgeService = angular
       };
     },
   ]);
+}
 
-export default appBridgeService;
+export default createAppBridgeService;

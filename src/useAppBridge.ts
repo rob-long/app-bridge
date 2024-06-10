@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react';
-import type { SetStateAction } from 'react';
-import AppBridge from './AppBridge.ts';
+import { createAppBridge } from './AppBridge.ts';
+import type { SubjectKey } from './AppBridge.ts';
 
-const useAppBridge = <T>(subjectName: string) => {
-  const [state, setState] = useState<T | null>(
-    AppBridge.getValue<T>(subjectName),
-  );
+const useAppBridge = <T>(subjectName: SubjectKey<T>) => {
+  const appBridge = createAppBridge<T>();
+  const [state, setState] = useState(appBridge.getValue(subjectName));
 
   useEffect(() => {
-    const subscription = AppBridge.subscribe(subjectName, {
-      next: (newState: SetStateAction<T | null>) => {
+    const subscription = appBridge.subscribe(subjectName, {
+      next: (newState) => {
         setState(newState);
       },
     });
@@ -19,8 +18,8 @@ const useAppBridge = <T>(subjectName: string) => {
     };
   }, [subjectName]);
 
-  const updateState = (newState: T) => {
-    AppBridge.updateSubject(subjectName, newState);
+  const updateState = (newState: T[SubjectKey<T>]) => {
+    appBridge.updateSubject(subjectName, newState);
   };
 
   return [state, updateState] as const;
