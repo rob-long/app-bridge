@@ -1,7 +1,9 @@
 import { BehaviorSubject, Subscription } from 'rxjs';
 
 /**
- * Interface for subject entries where the values are BehaviorSubject<any>.
+ * Interface representing a collection of BehaviorSubject instances.
+ *
+ * @template T - The type of the values managed by the BehaviorSubjects.
  */
 export type SubjectEntries<T> = {
   [K in SubjectKey<T>]: BehaviorSubject<T[K] | null>;
@@ -9,34 +11,43 @@ export type SubjectEntries<T> = {
 
 /**
  * Interface extending the Window object to include a subject manager.
+ *
+ * @template T - The type of the values managed by the subject manager.
  */
 export interface WindowWithSubjectManager<T> extends Window {
   _subjectManager: SubjectEntries<T>;
 }
 
 /**
- * `AppBridgeOptions` interface for defining options in AppBridge.
- *
- * @property reset - Optional. If true, resets the AppBridge.
+ * Options for configuring the AppBridge instance.
  */
 export interface AppBridgeOptions {
+  /**
+   * If true, resets the AppBridge instance.
+   */
   reset?: boolean;
 }
 
 declare const window: WindowWithSubjectManager<any>;
 
 /**
- * Type alias for valid keys of T.
+ * Type alias for the keys of a given type T.
  */
 export type SubjectKey<T> = keyof T & string;
 
 /**
  * AppBridge class provides a bridge for state management using RxJS BehaviorSubjects.
+ * It manages a collection of BehaviorSubject instances, allowing for state updates,
+ * retrievals, and subscriptions.
+ *
  * @template T - The type of the subjects managed by AppBridge.
  */
-class AppBridge<T> {
+export class AppBridge<T> {
   private static instance: AppBridge<any>;
 
+  /**
+   * Private constructor to enforce the singleton pattern.
+   */
   private constructor() {
     if (!window._subjectManager) {
       window._subjectManager = {} as SubjectEntries<T>;
@@ -44,7 +55,10 @@ class AppBridge<T> {
   }
 
   /**
-   * Gets the singleton instance of the AppBridge.
+   * Retrieves the singleton instance of the AppBridge.
+   * If the instance does not exist or the reset option is provided, a new instance is created.
+   *
+   * @template T - The type of the subjects managed by AppBridge.
    * @param options - Options to configure the instance.
    * @returns The singleton instance of AppBridge.
    */
@@ -56,9 +70,15 @@ class AppBridge<T> {
   }
 
   /**
-   * Clears all subjects, completing and removing them from the manager.
+   * Clears all BehaviorSubjects from the subject manager, completing and removing them.
+   *
+   * @example
+   * ```typescript
+   * const appBridge = AppBridge.getInstance<MyType>();
+   * appBridge.clearAllSubjects();
+   * ```
    */
-  clearAllSubjects(): void {
+  public clearAllSubjects(): void {
     for (const subjectKey in window._subjectManager) {
       if (window._subjectManager.hasOwnProperty(subjectKey)) {
         window._subjectManager[subjectKey].complete();
@@ -68,12 +88,21 @@ class AppBridge<T> {
   }
 
   /**
-   * Retrieves a BehaviorSubject by name, creating it if it doesn't exist.
+   * Retrieves a BehaviorSubject by its name, creating it if it does not exist.
    *
+   * @template K - The key type of the subject.
    * @param name - The name of the subject.
    * @returns The BehaviorSubject instance.
+   *
+   * @example
+   * ```typescript
+   * const subject = appBridge.getSubject('mySubject');
+   * subject.subscribe(value => console.log(value));
+   * ```
    */
-  getSubject<K extends SubjectKey<T>>(name: K): BehaviorSubject<T[K] | null> {
+  public getSubject<K extends SubjectKey<T>>(
+    name: K,
+  ): BehaviorSubject<T[K] | null> {
     if (!window._subjectManager[name]) {
       window._subjectManager[name] = new BehaviorSubject<T[K] | null>(null);
     }
@@ -81,43 +110,72 @@ class AppBridge<T> {
   }
 
   /**
-   * Updates the value of a BehaviorSubject by name, creating it if it doesn't exist.
+   * Updates the value of a BehaviorSubject by its name, creating it if it does not exist.
    *
+   * @template K - The key type of the subject.
    * @param name - The name of the subject.
    * @param newState - The new state to update.
+   *
+   * @example
+   * ```typescript
+   * appBridge.updateSubject('mySubject', { key: 'value' });
+   * ```
    */
-  updateSubject<K extends SubjectKey<T>>(name: K, newState: T[K]): void {
+  public updateSubject<K extends SubjectKey<T>>(name: K, newState: T[K]): void {
     this.getSubject(name).next(newState);
   }
 
   /**
-   * Emits an error in the BehaviorSubject by name.
+   * Emits an error in the BehaviorSubject by its name.
    *
+   * @template K - The key type of the subject.
    * @param name - The name of the subject.
    * @param error - The error to emit.
+   *
+   * @example
+   * ```typescript
+   * appBridge.errorSubject('mySubject', new Error('Something went wrong'));
+   * ```
    */
-  errorSubject<K extends SubjectKey<T>>(name: K, error: any): void {
+  public errorSubject<K extends SubjectKey<T>>(name: K, error: any): void {
     this.getSubject(name).error(error);
   }
 
   /**
-   * Retrieves the current value of a BehaviorSubject by name.
+   * Retrieves the current value of a BehaviorSubject by its name.
    *
+   * @template K - The key type of the subject.
    * @param name - The name of the subject.
    * @returns The current value of the subject.
+   *
+   * @example
+   * ```typescript
+   * const currentValue = appBridge.getValue('mySubject');
+   * console.log(currentValue);
+   * ```
    */
-  getValue<K extends SubjectKey<T>>(name: K): T[K] | null {
+  public getValue<K extends SubjectKey<T>>(name: K): T[K] | null {
     return this.getSubject(name).getValue();
   }
 
   /**
-   * Subscribes to a BehaviorSubject by name with an observer.
+   * Subscribes to a BehaviorSubject by its name with an observer.
    *
+   * @template K - The key type of the subject.
    * @param name - The name of the subject.
    * @param observer - The observer object with next, error, and complete callbacks.
    * @returns The subscription to the subject.
+   *
+   * @example
+   * ```typescript
+   * const subscription = appBridge.subscribe('mySubject', {
+   *   next: value => console.log(value),
+   *   error: error => console.error(error),
+   *   complete: () => console.log('Completed')
+   * });
+   * ```
    */
-  subscribe<K extends SubjectKey<T>>(
+  public subscribe<K extends SubjectKey<T>>(
     name: K,
     observer: {
       next?: (value: T[K] | null) => void;
@@ -130,7 +188,16 @@ class AppBridge<T> {
 }
 
 /**
- * Singleton instance creator for the AppBridge class.
+ * Factory function for creating or retrieving the singleton instance of the AppBridge class.
+ *
+ * @template T - The type of the subjects managed by AppBridge.
+ * @param options - Options to configure the instance.
+ * @returns The singleton instance of AppBridge.
+ *
+ * @example
+ * ```typescript
+ * const appBridge = createAppBridge<MyType>({ reset: true });
+ * ```
  */
 export function createAppBridge<T>(options: AppBridgeOptions = {}) {
   return AppBridge.getInstance<T>(options);

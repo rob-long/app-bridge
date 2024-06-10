@@ -11,7 +11,7 @@
     "build": "rollup -c",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
-    "docs": "typedoc --out docs src"
+    "docs": "typedoc"
   },
   "repository": {
     "type": "git",
