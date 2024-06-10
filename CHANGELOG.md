@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/rob-long/app-bridge/compare/v1.0.0...v1.1.0) (2024-06-10)
+
+
+### Features
+
+* Re-export types and update release docker with build, docs steps ([ac69e8a](https://github.com/rob-long/app-bridge/commit/ac69e8a376121d08b90d28bfa00452b72b85b0b0))
+
 # 1.0.0 (2024-06-10)
 
 
