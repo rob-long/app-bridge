@@ -8,5 +8,6 @@
   "excludeNotDocumented": true,
   "includeVersion": true,
   "name": "App Bridge Documentation",
-  "tsconfig": "tsconfig.json"
+  "tsconfig": "tsconfig.json",
+  "readme": "README.md"
 }

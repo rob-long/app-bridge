@@ -32,7 +32,7 @@ const appBridge = appBridgeService('myApp');
 ### React
 
 ```typescript
-import useAppBridge from '@rob-long/app-bridge';
+import { useAppBridge } from '@rob-long/app-bridge';
 
 const [state, updateState] = useAppBridge('mySubject');
 ```
