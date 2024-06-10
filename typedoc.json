@@ -1,0 +1,12 @@
+{
+  "entryPoints": ["src"], // Root directory for your source files
+  "entryPointStrategy": "expand",
+  "out": "docs",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeExternals": true,
+  "excludeNotDocumented": true,
+  "includeVersion": true,
+  "name": "App Bridge Documentation",
+  "tsconfig": "tsconfig.json"
+}

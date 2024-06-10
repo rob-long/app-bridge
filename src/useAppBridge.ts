@@ -1,15 +1,32 @@
 import { useEffect, useState } from 'react';
-import type { SetStateAction } from 'react';
-import AppBridge from './AppBridge.ts';
+import { createAppBridge } from './AppBridge.ts';
+import type { SubjectKey } from './AppBridge.ts';
 
-const useAppBridge = <T>(subjectName: string) => {
-  const [state, setState] = useState<T | null>(
-    AppBridge.getValue<T>(subjectName),
-  );
+/**
+ * Custom hook that subscribes to a subject from the AppBridge and provides state management.
+ *
+ * @template T - The type of the subjects managed by AppBridge.
+ * @param subjectName - The name of the subject to subscribe to.
+ * @returns A tuple containing the current state of the subject and a function to update the state.
+ *
+ * @example
+ * ```typescript
+ * const [state, updateState] = useAppBridge<MyType>('mySubject');
+ *
+ * // Use the state
+ * console.log(state);
+ *
+ * // Update the state
+ * updateState({ key: 'value' });
+ * ```
+ */
+const useAppBridge = <T>(subjectName: SubjectKey<T>) => {
+  const appBridge = createAppBridge<T>();
+  const [state, setState] = useState(appBridge.getValue(subjectName));
 
   useEffect(() => {
-    const subscription = AppBridge.subscribe(subjectName, {
-      next: (newState: SetStateAction<T | null>) => {
+    const subscription = appBridge.subscribe(subjectName, {
+      next: (newState) => {
         setState(newState);
       },
     });
@@ -19,8 +36,13 @@ const useAppBridge = <T>(subjectName: string) => {
     };
   }, [subjectName]);
 
-  const updateState = (newState: T) => {
-    AppBridge.updateSubject(subjectName, newState);
+  /**
+   * Updates the state of the subject.
+   *
+   * @param newState - The new state to set.
+   */
+  const updateState = (newState: T[SubjectKey<T>]) => {
+    appBridge.updateSubject(subjectName, newState);
   };
 
   return [state, updateState] as const;

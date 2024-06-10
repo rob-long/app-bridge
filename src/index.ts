@@ -1,5 +1,5 @@
-import AppBridge from './AppBridge.ts';
+import { createAppBridge } from './AppBridge.ts';
 import appBridgeService from './AppBridgeService.ts';
 import useAppBridge from './useAppBridge.ts';
 
-export { AppBridge, appBridgeService, useAppBridge };
+export { createAppBridge, appBridgeService, useAppBridge };
