@@ -2,6 +2,22 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import angular from 'angular';
 
 /**
+ * Interface representing a collection of BehaviorSubject instances.
+ *
+ * @template T - The type of the values managed by the BehaviorSubjects.
+ */
+type SubjectEntries<T> = {
+    [K in SubjectKey<T>]: BehaviorSubject<T[K] | null>;
+};
+/**
+ * Interface extending the Window object to include a subject manager.
+ *
+ * @template T - The type of the values managed by the subject manager.
+ */
+interface WindowWithSubjectManager<T> extends Window {
+    _subjectManager: SubjectEntries<T>;
+}
+/**
  * Options for configuring the AppBridge instance.
  */
 interface AppBridgeOptions {
@@ -14,6 +30,7 @@ interface AppBridgeOptions {
  * Type alias for the keys of a given type T.
  */
 type SubjectKey<T> = keyof T & string;
+
 /**
  * AppBridge class provides a bridge for state management using RxJS BehaviorSubjects.
  * It manages a collection of BehaviorSubject instances, allowing for state updates,
@@ -164,4 +181,4 @@ declare function createAppBridgeService<T>(applicationName: string): angular.IMo
  */
 declare const useAppBridge: <T>(subjectName: SubjectKey<T>) => readonly [T[SubjectKey<T>] | null, (newState: T[SubjectKey<T>]) => void];
 
-export { createAppBridgeService as appBridgeService, createAppBridge, useAppBridge };
+export { type AppBridgeOptions, type SubjectEntries, type SubjectKey, type WindowWithSubjectManager, createAppBridgeService as appBridgeService, createAppBridge, useAppBridge };

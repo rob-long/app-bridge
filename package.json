@@ -9,6 +9,7 @@
   "scripts": {
     "test": "jest --config jest.config.json",
     "build": "rollup -c",
+    "build:local": "npm run build && npm pack -pack-destination ~",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
     "docs": "typedoc"

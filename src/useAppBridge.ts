@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createAppBridge } from './AppBridge.ts';
-import type { SubjectKey } from './AppBridge.ts';
+import type { SubjectKey } from './types.ts';
 
 /**
  * Custom hook that subscribes to a subject from the AppBridge and provides state management.
